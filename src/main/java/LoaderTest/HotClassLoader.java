@@ -1,20 +1,22 @@
 package LoaderTest;
 
 import java.io.*;
-import java.lang.reflect.Method;
 
 /**
  * @program: JUC-demo
- * @description: MyClassLoader 加载String
+ * @description: 自定义classLoader
  * @author: zwh
- * @create: 2021-05-08 16:17
+ * @create: 2021-05-08 18:05
  **/
-public class MyClassLoader extends ClassLoader {
+public class HotClassLoader extends ClassLoader{
     private String root;
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
+        // 如果是java开始，则使用JVM自带的类加载器加载
+        if(name.startsWith("java")){
+            return getSystemClassLoader().loadClass(name);
+        }
         byte[] classData = loadClassData(name);
-
         if (classData == null) {
             throw new ClassNotFoundException();
         } else {
@@ -46,18 +48,5 @@ public class MyClassLoader extends ClassLoader {
 
     public void setRoot(String root) {
         this.root = root;
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        MyClassLoader classLoader = new MyClassLoader();
-        classLoader.setRoot("F:\\workspace\\JUC-demo\\src\\main\\java");
-        Class<?> clz = classLoader.findClass("myLang.String");
-        Object instance = clz.newInstance();
-        Method test = clz.getDeclaredMethod("test");
-        test.setAccessible(true);
-        test.invoke(instance);
-        System.out.println(instance.getClass().getClassLoader());
-
     }
 }
